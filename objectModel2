@@ -1,0 +1,224 @@
+import { useState, useEffect } from "react"
+import { fetchCustomers } from "./hooks/useGetCustomers"
+
+
+ // Creates a template to allow users to input their details and submit it into the database
+const CustomerForm = ({ setEditId,formData,setCustomers, setFormData}) =>{
+
+    //first formData is empty without formData?
+    //? wait until defined
+    const [title,setTitle] = useState( '') // ? first take the value then ? else
+    const [FirstName,setFirst] = useState('')
+    const [Surname,setSurname] = useState('')
+    const [Mobile,setMobile] = useState( '')
+    const [Email,setEmail] = useState( '')
+    const [Address1,setAddress1] = useState('')
+    const [Address2,setAddress2] = useState('')
+    const [Town,setTown] = useState('')
+    const [County,setCounty] = useState('')
+    const [Eircode,setEircode] = useState('')
+    const [isFormEditing,setIsFormEditing] = useState(false)
+    const [error,setError] = useState(null)
+
+    const onChangeValue =(e)=>{
+        setFormDataMock((prev)=>{
+            return{
+                ...prev,
+                [e.target.name]: e.target.value
+            }
+        })
+    }
+
+
+    const [formDataMock, setFormDataMock]= useState({
+        title: '',
+        firstName: '',
+        surName: '',
+        mobile:'',
+        email: '',
+        address1:'',
+        address2:'',
+        town:'',
+        country:'',
+        eirCode:'',
+    })
+
+
+    useEffect(()=>{
+        if (!!formData?.title){
+            setTitle(formData?.title)
+            setFirst(formData?.FirstName)
+            setSurname(formData?.Surname)
+            setMobile(formData?.Mobile)
+            setEmail(formData.Email)
+            setAddress1(formData.Address1)
+            setAddress2(formData.Address2)
+            setTown(formData.Town)
+            setCounty(formData.County)
+            setEircode(formData.Eircode)
+            setError(null)
+            setIsFormEditing(true)
+
+        }
+
+       
+
+    },[formData?.title])
+  
+    
+    const handleSubmit = async (e) =>{
+        e.preventDefault()
+        const customer = {title,FirstName,Surname,Mobile,Email,Address1,Address2,Town,County,Eircode}
+      
+
+       if( isFormEditing ){
+        
+            const response = await fetch(`/api/customer/${formData?._id}`,
+            {
+                method: "PATCH",
+                body: JSON.stringify(customer),
+                headers:{
+                    'Content-Type': 'application/json'
+                }
+            }
+                         )
+            if(!response.ok){
+            setError(json.error)
+           
+            }
+            if (response.ok){
+                setFormDataMock({})
+                setTitle('')
+                setFirst('')
+                setSurname('')
+                setMobile('')
+                setEmail('')
+                setAddress1('')
+                setAddress2('')
+                setTown('')
+                setCounty('')
+                setEircode('')
+                setError(null)
+                setIsFormEditing(false)
+                fetchCustomers().then((data)=> setCustomers(data))
+                setFormData({})
+
+            }
+                        
+            setEditId('') 
+        return
+       }
+
+    
+        
+    const response = await fetch('/api/customer',{
+            method: 'POST',
+            body: JSON.stringify(customer),
+            headers:{
+                'Content-Type': 'application/json'
+            }
+        })
+
+        
+        const json = await response.json()
+        if(!response.ok){
+            setError(json.error)
+        }
+        if(response.ok){
+            setFormDataMock({})
+            setTitle('')
+            setFirst('')
+            setSurname('')
+            setMobile('')
+            setEmail('')
+            setAddress1('')
+            setAddress2('')
+            setTown('')
+            setCounty('')
+            setEircode('')
+            setError(null)
+            
+        }
+    }
+return(
+    <form className = "create" onSubmit={handleSubmit}> 
+        <h3> Add a New Customer</h3>
+        <label>Title: </label>
+        <input 
+            name= 'title'
+            type ="text"
+            onChange={(e)=> onChangeValue(e)} 
+            value={formDataMock.title}
+        />
+        <label>First Name: </label>
+        <input 
+        name= 'firstName'
+            type ="text"
+            onChange={(e)=> onChangeValue(e)} 
+            value={FirstName}
+        />
+        <label>Surname: </label>
+        <input 
+         name= 'surName'
+            type ="text"
+            onChange={(e)=> onChangeValue(e)}             
+            value={Surname}
+        />
+        <label>Mobile: </label>
+        <input 
+         name= 'mobile'
+            type ="number"
+            onChange={(e)=> setMobile(e.target.value)} 
+            value={Mobile}
+        />
+        <label>Email: </label>
+        <input 
+         name= 'email'
+            type ="text"
+            onChange={(e)=> setEmail(e.target.value)} 
+            value={Email}
+        />
+        <label>Address1: </label>
+        <input 
+            type ="text"
+            onChange={(e)=> setAddress1(e.target.value)} 
+            value={Address1}
+        />
+        <label>Address2: </label>
+        <input 
+         name= 'address2'
+            type ="text"
+            onChange={(e)=> setAddress2(e.target.value)} 
+            value={Address2}
+        />
+        <label>Town: </label>
+        <input 
+         name= 'town'
+            type ="text"
+            onChange={(e)=> setTown(e.target.value)} 
+            value={Town}
+        />
+        <label>County: </label>
+        <input 
+           name= 'country'
+            type ="text"
+            onChange={(e)=> setCounty(e.target.value)} 
+            value={County}
+        />
+        <label>Eircode: </label>
+        <input 
+        name= 'eirCode'
+            type ="text"
+            onChange={(e)=> setEircode(e.target.value)} 
+            value={Eircode}
+        />
+        <button>{isFormEditing?"Update ":"Add "}Customer</button>
+        {error &&<div className ="error">{error}</div>}
+    </form>
+
+
+        
+    )
+}
+
+export default CustomerForm
